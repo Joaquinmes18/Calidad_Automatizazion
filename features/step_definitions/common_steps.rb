@@ -40,5 +40,6 @@ Then('the {string} button should be visible for {string}') do |button_text, prod
   product_item = page.all('.inventory_item').find do |el|
     el.find('.inventory_item_name').text == product_name
   end
-  expect(product_item).to have_button(button_text)
+  # Wait for the button to be available with the correct text
+  expect(product_item).to have_button(button_text, wait: 5)
 end
