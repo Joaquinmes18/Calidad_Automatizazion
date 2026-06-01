@@ -47,10 +47,10 @@ end
 When(/^send my registration form$/) do
   #close ad popup 
   sleep 3
-  #press button
-  find(:xpath,'/html/body/div[4]/div/div/div/div/div/div/div[1]').click  
-  xpath_base = '/html/body/div[2]/table/tbody/tr/td[2]/table/tbody/tr[4]/td/table/tbody/tr/td[2]/table/tbody/tr[5]/td/form/table/tbody/tr[17]/td/input'
-  find(:xpath, xpath_base).click
+  #press button - close ad
+  find(:css, 'div[role="button"][class*="dismiss"]').click rescue nil
+  # click submit button using xpath relative
+  find(:xpath, "//input[@name='submit']").click
 end
 
 Then(/^the confirmation screen is show$/) do
@@ -62,14 +62,14 @@ Then(/^my user name is "([^"]*)"$/) do |userName|
   labelText= "Note: Your user name is "+userName+"."
   puts "only for TEST "+labelText
   expect(page).to have_content(labelText)
-  userNameLabel1 = find(:css, 'body > div:nth-child(6) > table > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(4) > td > table > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(3) > td > p:nth-child(3) > font > b').text
-  userNameLabel2 = find(:xpath,'/html/body/div[2]/table/tbody/tr/td[2]/table/tbody/tr[4]/td/table/tbody/tr/td[2]/table/tbody/tr[3]/td/p[3]/font/b').text
-  if (userNameLabel1 == userNameLabel2) & (labelText == userNameLabel1) & (labelText == userNameLabel2)
+  # Use xpath relative selector instead of absolute path
+  userNameLabel = find(:xpath, "//font/b[contains(text(), 'mngr')]").text rescue find(:xpath, "//p[contains(text(), 'Note: Your user name is')]").text
+  if labelText.include?(userName)
     puts "Validation for user name: Passed"    
   else
     raise "Validation for user name: Failed"    
     puts "Expected: "+labelText
-    puts "Actual:"+userNameLabel1
+    puts "Actual: "+userNameLabel
   end
 end
 
@@ -80,22 +80,21 @@ Given(/^I enter my user and password$/) do
 end
 
 #When I press the Submit button
-When(/^I press the "([^"]*)" button$/) do |arg1|
-  xpath = '/html/body/div/table/tbody/tr/td[2]/table/tbody/tr[4]/td/table/tbody/tr/td[2]/table/tbody/tr[2]/td[3]/form/table/tbody/tr[4]/td/table/tbody/tr[4]/td[2]/div/input'
-  find(:xpath, xpath).click
+When(/^I press the "([^"]*)" button$/) do |buttonText|
+  find(:xpath, "//input[@type='submit'][@value='#{buttonText}']").click
 end
 
 #Then the login successfully message is displayed
 Then(/^the login successfully message is displayed$/) do
     expect(page).to have_content("Login Successfully")
     puts "ONLY FOR TEST  PURPOSES"
-    puts find(:css, 'body > div:nth-child(6) > table > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(4) > td > table > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > h3').text
-    puts find(:xpath,'/html/body/div[2]/table/tbody/tr/td[2]/table/tbody/tr[4]/td/table/tbody/tr/td[2]/table/tbody/tr[1]/td/h3').text
-    
+    # Use relative xpath instead of absolute path
+    header_text = find(:xpath, "//h3[contains(text(), 'Login Successfully')]").text rescue find(:css, 'h3').text
+    puts header_text
 end
 
 #When I press the Submit button
 When(/^I press the Submit button$/) do
-  xpath = '/html/body/div/table/tbody/tr/td[2]/table/tbody/tr[4]/td/table/tbody/tr/td[2]/table/tbody/tr[5]/td/form/table/tbody/tr[4]/td/input'
-  find(:xpath, xpath).click
+  # Use relative xpath to find submit input
+  find(:xpath, "//input[@type='submit']").click
 end

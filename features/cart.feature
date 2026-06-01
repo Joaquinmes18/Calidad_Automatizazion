@@ -5,6 +5,10 @@ Feature: Sauce Demo Cart
   As a logged in customer
   I want to verify the shopping cart functionality
 
+  Background:
+    Given I am logged in as "standard_user" with password "secret_sauce"
+    And I am on the inventory page
+
   Scenario: Add one product to the cart
     When I add the product "Sauce Labs Backpack" to the cart
     Then the cart badge should show "1"

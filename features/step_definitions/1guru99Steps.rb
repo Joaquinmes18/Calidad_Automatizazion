@@ -27,18 +27,19 @@ end
 #Then I should see the following table:
 Then(/^I should see the following table:$/) do |table|
   loginMessage = 'Access details to demo site'
-  find(:xpath, '/html/body/table/tbody/tr[1]/td/h2', :text => loginMessage)
+  # Use relative xpath instead of absolute
+  expect(page).to have_xpath("//h2[contains(text(), '#{loginMessage}')]")
   data = table.rows_hash
-  counter = 4
-  path = find(:xpath, '/html/body/table')
-  xpath_base_name = './tbody/tr[%i]/td[1]'
+  # Find table and verify each row
+  table_element = find(:xpath, "//table")
   data.each_pair do |key, value|
-     expect(path.find(:xpath, xpath_base_name % [counter])).to have_content(key)
-     counter += 1 
+    expect(table_element).to have_content(key)
+    expect(table_element).to have_content(value)
   end
 end
 
-Then(/^I should see mngr(\d+) id$/) do |arg1|
-  purchasedLabel = find(:xpath, '/html/body/table/tbody/tr[4]/td[2]', :text => /\Amngr\d\d\d\d\d\d\z/)
+Then(/^I should see mngr(\d+) id$/) do |managerID|
+  # Use relative xpath to find manager ID
+  expect(page).to have_xpath("//td[contains(text(), 'mngr#{managerID}')]")
 end
     

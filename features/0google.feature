@@ -2,8 +2,10 @@ Feature: As a BDD fanatic
          I want to start writing my tests
          so I learn more about automation
 
+  Background:
+    Given I browse to the UCB page
+
 Scenario: Testing links on UCB page
-  Given I browse to the UCB page
   When I see a link for the "SIAAn"
   And I see a link for the "LMS – UCB"
   And I see a link for the "Google Workspace"

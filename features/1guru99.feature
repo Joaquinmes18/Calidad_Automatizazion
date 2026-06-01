@@ -3,8 +3,11 @@ Feature: Guru99 Demo Page
    I want to test Guru99 registration page
    so I learn how to use Capybara
 
+  Background:
+    Given I am on the sample homepage
+
 @maximize
-Scenario: Register on Guru99 page without email        
+Scenario: Register on Guru99 page without email
 	Given I am on the sample homepage
 	When I enter blank details for Register
 	And Press the "Submit" button
@@ -12,7 +15,6 @@ Scenario: Register on Guru99 page without email
 
 @maximize
 Scenario: Register on Guru99 page with a valid email        
-    Given I am on the sample homepage
 	When I enter "carlos@test.com" for Register
       And Press the "Submit" button
 	Then I should see the following table:
@@ -21,7 +23,6 @@ Scenario: Register on Guru99 page with a valid email
 
 @maximize
 Scenario Outline: Register on Guru99 page with a several emails        
-  Given I am on the sample homepage
   When I enter "<email>" for Register
     And Press the "Submit" button
   Then I should see <username> id

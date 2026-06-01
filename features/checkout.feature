@@ -5,6 +5,12 @@ Feature: Sauce Demo Checkout
   As a logged in customer
   I want to verify the checkout process
 
+  Background:
+    Given I am logged in as "standard_user" with password "secret_sauce"
+    And I am on the inventory page
+    And I have added the product "Sauce Labs Backpack" to the cart
+    And I am on the checkout information page
+
   Scenario Outline: Checkout requires mandatory customer information
     When I try to continue checkout with missing "<missing_field>"
     Then I should see the checkout error "<error_message>"

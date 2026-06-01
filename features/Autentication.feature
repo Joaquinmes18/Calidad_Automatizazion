@@ -6,11 +6,11 @@ Feature: Sauce Demo Verify Login
 
   I want to verify the login functionality with different types of users
 
+  Background:
+    Given I am on the Sauce Demo login page
 
 @smoke
 Scenario Outline: Verify login with different user types
-
-  Given I am on the Sauce Demo login page
 
   When I enter "<username>" as username
 
