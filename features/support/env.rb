@@ -15,31 +15,60 @@ Capybara.app_host = "https://cba.ucb.edu.bo/"
 Capybara.default_max_wait_time = 15
 Capybara.default_driver = :selenium
 
+# ============================================================
+# CONFIGURACIÓN DE NAVEGADOR - CAMBIA AQUÍ SEGÚN NECESITES
+# ============================================================
+# Opciones disponibles:
+#   BROWSER_TYPE = :chrome    → Usa Google Chrome
+#   BROWSER_TYPE = :brave     → Usa Brave Browser
+BROWSER_TYPE = :brave
+# ============================================================
+
 class CapybaraDriverRegistrar
   # register a Selenium driver for the given browser to run on the localhost
-  def self.register_selenium_driver(browser)
+  def self.register_selenium_driver(browser_type)
     Capybara.register_driver :selenium do |app|
       
-      # Si el proyecto pide :chrome, interceptamos la llamada y abrimos Brave
-      if browser == :chrome
+      if browser_type == :brave
         options = Selenium::WebDriver::Chrome::Options.new
-        # RUTA DE BRAVE: Verifica que esta sea la correcta en tu PC
-        options.binary = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
+        
+        # Intentar encontrar Brave en ubicaciones comunes
+        brave_paths = [
+          "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
+          "C:/Program Files (x86)/BraveSoftware/Brave-Browser/Application/brave.exe"
+        ]
+        
+        brave_found = nil
+        brave_paths.each do |path|
+          if File.exist?(path)
+            brave_found = path
+            break
+          end
+        end
+        
+        if brave_found
+          options.binary = brave_found
+          puts "✓ Brave encontrado en: #{brave_found}"
+        else
+          puts "✗ Brave no encontrado. Instalaciones probables:"
+          puts "  - C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
+          puts "  - C:/Program Files (x86)/BraveSoftware/Brave-Browser/Application/brave.exe"
+          puts "Usando Chrome como alternativa..."
+          browser_type = :chrome
+        end
         
         Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
       else
-        Capybara::Selenium::Driver.new(app, :browser => browser)
+        # Chrome por defecto
+        options = Selenium::WebDriver::Chrome::Options.new
+        Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
       end
       
     end
   end
 end
 
-# Register various Selenium drivers
-#CapybaraDriverRegistrar.register_selenium_driver(:internet_explorer)
-#CapybaraDriverRegistrar.register_selenium_driver(:firefox)
-
-# Al llamar a :chrome, el código de arriba redirigirá a Brave
-CapybaraDriverRegistrar.register_selenium_driver(:chrome) 
+# Registrar el driver
+CapybaraDriverRegistrar.register_selenium_driver(BROWSER_TYPE)
 
 Capybara.run_server = false
