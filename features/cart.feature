@@ -9,6 +9,7 @@ Feature: Sauce Demo Cart
     Given I am logged in as "standard_user" with password "secret_sauce"
     And I am on the inventory page
 
+  @smoke
   Scenario: Add one product to the cart
     When I add the product "Sauce Labs Backpack" to the cart
     Then the cart badge should show "1"
@@ -59,7 +60,14 @@ Feature: Sauce Demo Cart
     When I go to the cart page
     And I click the "Continue Shopping" button on the cart page
     Then I should be on the inventory page
-    And I should see 6 products in the inventory
+    And the following 6 products should be visible in the inventory:
+      | product_name                      |
+      | Sauce Labs Backpack               |
+      | Sauce Labs Bike Light             |
+      | Sauce Labs Bolt T-Shirt           |
+      | Sauce Labs Fleece Jacket          |
+      | Sauce Labs Onesie                 |
+      | Test.allTheThings() T-Shirt (Red) |
 
   Scenario: Cart keeps selected products while navigating between inventory and cart
     Given I have added the following products to the cart:

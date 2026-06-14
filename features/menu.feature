@@ -8,6 +8,7 @@ Feature: Sauce Demo Menu
     Given I am logged in as "standard_user" with password "secret_sauce"
     And I am on the inventory page
 
+  @smoke
   Scenario: Logout successfully
     When I open the hamburger menu
     And I click "Logout" from the menu

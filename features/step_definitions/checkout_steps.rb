@@ -1,24 +1,15 @@
-require 'bigdecimal'
-
-def money_from(selector)
-  text = find(selector).text
-  BigDecimal(text.match(/\$([\d.]+)/)[1])
-end
-
 When('I proceed to checkout') do
-  find('[data-test="checkout"]').click
-  expect(page).to have_current_path('/checkout-step-one.html', url: false)
+  cart_page.click_checkout
+  expect(checkout_info_page.on_page?).to be true
 end
 
 When('I complete the checkout information with:') do |table|
   data = table.rows_hash
-  fill_in 'first-name', with: data['first_name']
-  fill_in 'last-name', with: data['last_name']
-  fill_in 'postal-code', with: data['postal_code']
+  checkout_info_page.fill_information(data['first_name'], data['last_name'], data['postal_code'])
 end
 
 When('I submit the checkout information') do
-  find('[data-test="continue"]').click
+  checkout_info_page.click_continue
 end
 
 When('I provide valid checkout information:') do |table|
@@ -44,54 +35,59 @@ When('I try to continue checkout with missing {string}') do |missing_field|
     raise "Unsupported checkout field: #{missing_field}"
   end
 
-  fill_in 'first-name', with: checkout_data['first_name']
-  fill_in 'last-name', with: checkout_data['last_name']
-  fill_in 'postal-code', with: checkout_data['postal_code']
-  find('[data-test="continue"]').click
+  checkout_info_page.fill_information(
+    checkout_data['first_name'],
+    checkout_data['last_name'],
+    checkout_data['postal_code']
+  )
+  checkout_info_page.click_continue
 end
 
 When('I cancel checkout from the information page') do
-  find('[data-test="cancel"]').click
+  checkout_info_page.click_cancel
 end
 
 Then('I should see the checkout error {string}') do |error_message|
-  expect(page).to have_css('[data-test="error"]', text: error_message)
+  expect(checkout_info_page.has_error_message?(error_message)).to be true
 end
 
 Then('I should still be on the checkout information page') do
-  expect(page).to have_current_path('/checkout-step-one.html', url: false)
-  expect(page).to have_field('first-name')
-  expect(page).to have_field('last-name')
-  expect(page).to have_field('postal-code')
+  expect(checkout_info_page.on_page?).to be true
 end
 
 Then('I should be on the cart page') do
-  expect(page).to have_current_path('/cart.html', url: false)
-  expect(page).to have_css('.cart_list')
+  expect(cart_page.on_page?).to be true
 end
 
 Then('I should be on the checkout overview page') do
-  expect(page).to have_current_path('/checkout-step-two.html', url: false)
-  expect(page).to have_css('.checkout_summary_container')
+  expect(checkout_overview_page.on_page?).to be true
 end
 
 Then('the order should contain the product {string}') do |product_name|
-  expect(page).to have_css('.inventory_item_name', text: product_name)
+  expect(checkout_overview_page.has_product?(product_name)).to be true
 end
 
 When('I finish the purchase') do
-  find('[data-test="finish"]').click
+  checkout_overview_page.click_finish
 end
 
 Then('I should see the order confirmation message {string}') do |message|
-  expect(page).to have_current_path('/checkout-complete.html', url: false)
-  expect(page).to have_css('.complete-header', text: message)
+  expect(checkout_complete_page.on_page?).to be true
+  expect(checkout_complete_page.has_confirmation_message?(message)).to be true
 end
 
 Then('the checkout total should equal the item total plus tax') do
-  item_total = money_from('[data-test="subtotal-label"]')
-  tax = money_from('[data-test="tax-label"]')
-  total = money_from('[data-test="total-label"]')
+  expect(checkout_overview_page.item_total + checkout_overview_page.tax).to eq(checkout_overview_page.total)
+end
 
-  expect(item_total + tax).to eq(total)
+Then('the checkout total should match:') do |table|
+  expected = table.rows_hash
+  expected_item_total = BigDecimal(expected['item_total'].gsub('$', ''))
+  expected_tax = BigDecimal(expected['tax'].gsub('$', ''))
+  expected_total = BigDecimal(expected['total'].gsub('$', ''))
+
+  expect(checkout_overview_page.item_total).to eq(expected_item_total)
+  expect(checkout_overview_page.tax).to eq(expected_tax)
+  expect(checkout_overview_page.total).to eq(expected_total)
+  expect(checkout_overview_page.item_total + checkout_overview_page.tax).to eq(checkout_overview_page.total)
 end

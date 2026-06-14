@@ -1,19 +1,19 @@
 Given('I am on the Sauce Demo login page') do
-  visit 'https://www.saucedemo.com/'
+  login_page.visit_page
 end
 
 When('I enter {string} as username') do |username|
-  fill_in 'user-name', with: username
+  login_page.enter_username(username)
 end
 
 When('I enter {string} as password') do |password|
-  fill_in 'password', with: password
+  login_page.enter_password(password)
 end
 
 When('I click the {string} button on the login form') do |button_name|
   case button_name
   when 'Login'
-    click_button 'login-button'
+    login_page.click_login
   else
     raise "Unsupported button: #{button_name}"
   end
@@ -21,13 +21,10 @@ end
 
 Then('the login result should be {string}') do |expected_result|
   if expected_result == 'redirected to inventory page'
-    expect(page).to have_current_path('/inventory.html', url: false)
-    expect(page).to have_content('Products')
-    expect(page).to have_css('.inventory_list')
-    expect(page).to have_css('.shopping_cart_link')
+    expect(inventory_page.on_page?).to be true
   else
-    expect(page).to have_css('[data-test="error"]', text: expected_result)
-    expect(page).not_to have_current_path('/inventory.html', url: false)
-    expect(page).to have_css('#user-name', visible: true)
+    expect(login_page.has_error_message?(expected_result)).to be true
+    expect(inventory_page.on_page?).to be false
+    expect(login_page.username_field_visible?).to be true
   end
 end

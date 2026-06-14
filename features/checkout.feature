@@ -1,4 +1,4 @@
-@checkout @checkout_ready
+@checkout
 Feature: Sauce Demo Checkout
 
   In order to purchase products in Sauce Demo
@@ -8,8 +8,9 @@ Feature: Sauce Demo Checkout
   Background:
     Given I am logged in as "standard_user" with password "secret_sauce"
     And I am on the inventory page
-    And I have added the product "Sauce Labs Backpack" to the cart
-    And I am on the checkout information page
+    And I add the product "Sauce Labs Backpack" to the cart
+    And I go to the cart page
+    And I proceed to checkout
 
   Scenario Outline: Checkout requires mandatory customer information
     When I try to continue checkout with missing "<missing_field>"
@@ -22,6 +23,7 @@ Feature: Sauce Demo Checkout
       | last name     | Error: Last Name is required   |
       | postal code   | Error: Postal Code is required |
 
+  @smoke
   Scenario: Complete a purchase successfully
     When I provide valid checkout information:
       | first_name  | Juan  |
@@ -38,7 +40,10 @@ Feature: Sauce Demo Checkout
       | last_name   | Perez |
       | postal_code | 00100 |
     Then I should be on the checkout overview page
-    And the checkout total should equal the item total plus tax
+    And the checkout total should match:
+      | item_total | $29.99 |
+      | tax        | $2.40  |
+      | total      | $32.39 |
 
   Scenario: Cancel checkout returns to the cart
     When I cancel checkout from the information page
